@@ -170,22 +170,22 @@ app.get("/", (req, res) => {
 
 app.post("/loginSubmit", async (req, res) => {
   
-    var email = req.body.email;
+    var username = req.body.username;
     var password = req.body.password;
     
     const schema = Joi.object({
-      email: Joi.string().email().required(),
+      username: Joi.string().username().required(),
       password: Joi.string().max(20).required(),
     });
   
-    const validationResult = schema.validate({ email, password });
+    const validationResult = schema.validate({ username, password });
     if (validationResult.error != null) {
       console.log(validationResult.error);
       res.redirect("/login");
       return;
     }
     
-    const result = await userCollection.find({email: email}).project({ email: 1, password: 1, _id: 1, username: 1 }).toArray();
+    const result = await userCollection.find({username: username}).project({ username: 1, password: 1, _id: 1, username: 1 }).toArray();
     
     console.log(result);
     if (result.length != 1) {
@@ -196,7 +196,7 @@ app.post("/loginSubmit", async (req, res) => {
     if (await bcrypt.compare(password, result[0].password)) {
       console.log("right password");
       await userCollection.updateOne(
-        { email: email },
+        { username: username },
         { $set: { user_type: "user" } }
       );
       req.session.authenticated = true;
@@ -207,7 +207,7 @@ app.post("/loginSubmit", async (req, res) => {
       return;
     } else {
       console.log("wrong password");
-      res.redirect("/login?errorMsg=Invalid email/password combination.");
+      res.redirect("/login?errorMsg=Invalid user/password combination.");
       return;
     }
   });
